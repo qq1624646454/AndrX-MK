@@ -1,0 +1,141 @@
+#Copyrights(C) 2020-2100.   Jielong Lin.  All rights reserved.
+#Email: jielong.lin@qq.com
+
+ENV_CROSS_COMPILE_TOOLCHAIN=mkutils/portability/environment-setup-x86_64-linux-gnueabi
+
+cat <<EOF
+
+-----------------------------------------------------------------
+Copyrights(C) 2020-2100.   Jielong Lin.  All rights reserved.
+
+  BuildSystem environment initialized file
+  This BuildSystem is a similar to Android build subsystem,
+  but it is the simpilest by using AndrX.mk
+
+  Revision:
+      rev-1.0  2020-1-16   by JLLim
+-----------------------------------------------------------------
+
+EOF
+
+
+
+
+function gettop
+{
+    local TOPFILE=mkutils/core/lib.mk
+    if [ -n "$TOP" -a -f "$TOP/$TOPFILE" ] ; then
+        echo $TOP
+    else
+        if [ -f $TOPFILE ] ; then
+            # The following circumlocution (repeated below as well) ensures
+            # that we record the true directory name and not one that is
+            # faked up with symlink names.
+            PWD= /bin/pwd
+        else
+            local HERE=$PWD
+            T=
+            while [ \( ! \( -f $TOPFILE \) \) -a \( $PWD != "/" \) ]; do
+                \cd ..
+                T=`PWD= /bin/pwd`
+            done
+            \cd $HERE
+            if [ -f "$T/$TOPFILE" ]; then
+                echo $T
+            fi
+        fi
+    fi
+}
+
+
+#Try to find Makefile towarding upper directory started from current path 
+#until Makefile is found or arrive at top directory.
+#Output Makefile path if Makefile is found in legal position, or Output nothing
+#Note: not output the Makefile path in top path
+function findmakefile()
+{
+    local TOPFILE=mkutils/core/lib.mk
+    local HERE=$PWD
+    T=
+    while [ \( ! \( -f $TOPFILE \) \) -a \( $PWD != "/" \) ]; do
+        T=`PWD= /bin/pwd`
+        if [ -f "$T/AndrX.mk" ]; then
+            echo $T/AndrX.mk
+            \cd $HERE
+            return
+        fi
+        \cd ..
+    done
+    \cd $HERE
+}
+
+
+function mm()
+{
+    local TOPFILE=mkutils/core/lib.mk
+    # If we're sitting in the root of the build tree, just do a
+    # normal make.
+    if [ -f $TOPFILE -a -f Makefile ]; then
+        make $@
+    else
+        # Find the closest Makefile file.
+        T=$(gettop)
+        local M=$(findmakefile)
+        local MODULES=
+        local GET_INSTALL_PATH=
+        local ARGS=
+        # Remove the path to top as the makefilepath needs to be relative
+        local M=`echo $M|sed 's:'$T'/::'`
+        if [ ! "$T" ]; then
+            echo "Couldn't locate the top of the tree.  Try setting TOP."
+        elif [ ! "$M" ]; then
+            echo "Couldn't locate a makefile from the current directory."
+        else
+            for ARG in $@; do
+                case $ARG in
+                  GET-INSTALL-PATH) GET_INSTALL_PATH=$ARG;;
+                esac
+            done
+            if [ -n "$GET_INSTALL_PATH" ]; then
+              MODULES=
+              ARGS=GET-INSTALL-PATH
+            else
+              MODULES=all_modules
+              ARGS=$@
+            fi
+            #JLLim: ONE_SHOT_MAKEFILE is a parameter passed to make
+            #       ONE_SHOT_MAKEFILE=riv-common/AndrX.mk \
+            #       make -C /root/prj_makefile/ws_makefile/sdk-l170h \
+            #            -f mkutils/core/main.mk all_modules
+            echo "[Run] ONE_SHOT_MAKEFILE=$M make -C $T -f mkutils/core/main.mk $MODULES $ARGS"
+            ONE_SHOT_MAKEFILE=$M make -C $T -f mkutils/core/main.mk $MODULES $ARGS
+        fi
+    fi
+}
+
+
+
+if [ x"${ENV_INIT}" != x"1" \
+    -a -e ${ENV_CROSS_COMPILE_TOOLCHAIN} ]; then
+    source ${ENV_CROSS_COMPILE_TOOLCHAIN} 
+    export ENV_INIT=1
+    if [ -d mkutils/tools -a y"$(gettop 2>/dev/null)" != y ]; then
+        export PATH=$(gettop)/mkutils/tools:$PATH
+    fi
+    echo "[Ok] Environment is initialized for compilation build target"
+elif [ x"${ENV_INIT}" = x"1" ]; then
+    echo "[Ok] Environment has already been initialized for compilation build target"
+else
+    echo "[Error] mdm9x07 associated environment variable file @mkutils/portability is not found"
+    echo "[Fatal] Initialize environment for compilation build target"
+    echo
+    return 2>/dev/null  #source context
+    echo "        Please use source command to initialize environment by the follows:"
+    echo "            source mkutils/envsetup"
+    echo
+    exit 0              #bash shell context in another process
+fi
+echo
+
+#echo "gettop = $(gettop)"
+

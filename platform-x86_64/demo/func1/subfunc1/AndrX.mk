@@ -1,0 +1,15 @@
+
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := $(call all-subdir-c-files) 
+
+LOCAL_MODULE := libsubfunc1
+
+LOCAL_MODULE_TAGS := optional
+
+#LOCAL_SHARED_LIBRARIES  := libutils liblog
+#LOCAL_STATIC_LIBRARIES  := libtest
+
+include $(BUILD_SHARED_LIBRARY)
