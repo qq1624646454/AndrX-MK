@@ -4,7 +4,7 @@ include $(BUILD_SYSTEM)/lib.mk
 
 #0: disable compile log
 #1: enable compile log
-JLLim_DEBUG := 0 
+JLLim_DEBUG := 0
 
 ###########################################
 # CFLAGS
@@ -125,7 +125,7 @@ $(foreach _tgt, $(LOCAL_MODULE), \
                , $(strip $(OUT_OBJS_DIR)static_library/build/$(_tgt)/)___static_libs \
                , $(shell rm -rf \
                             $(strip $(OUT_OBJS_DIR)static_library/build/$(_tgt)/)___static_libs \
-                            2>/dev/null) \
+                            >/dev/null) \
                , $(call collect-and-extract-static-libs-to-o-by-shell, $$@, $$^, \
                             $(LOCAL_PATH), $(LOCAL_STATIC_LIBRARIES) \
                  ) \
@@ -156,9 +156,7 @@ $(foreach _tgt, $(LOCAL_MODULE), \
     ) \
     $(eval $(call recipe-for-target-colon-prerequisites \
                , $(strip $(OUT_OBJS_DIR)static_library/build/$(_tgt)/)___static_libs \
-               , $(shell rm -rf \
-                            $(strip $(OUT_OBJS_DIR)static_library/build/$(_tgt)/)___static_libs \
-                            2>/dev/null) \
+               , \
                , @$(call collect-and-extract-static-libs-to-o-by-shell, $$@, $$^, \
                             $(LOCAL_PATH), $(LOCAL_STATIC_LIBRARIES) \
                  ) \
@@ -178,6 +176,10 @@ $(foreach _tgt, $(LOCAL_MODULE), \
     ) \
 )
 endif
+
+#$(shell rm -rf \
+#                            $(strip $(OUT_OBJS_DIR)static_library/build/$(_tgt)/)___static_libs \
+#                            >/dev/null) 
 
 #               , $(AR) rcs $$@ $(OUT_OBJS_DIR)static_library/build/$(_tgt)/)___static_libs/*.o \
 #                     $$(filter %.o, $$^) \

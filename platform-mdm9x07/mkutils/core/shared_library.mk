@@ -4,7 +4,7 @@ include $(BUILD_SYSTEM)/lib.mk
 
 #0: disable compile log
 #1: enable compile log
-JLLim_DEBUG := 0 
+JLLim_DEBUG := 0
 
 ###########################################
 # CFLAGS
@@ -51,11 +51,21 @@ $(foreach _tgt, $(LOCAL_MODULE), \
            ) \
     ) \
     $(eval $(call recipe-for-target-colon-prerequisites \
+               , $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs \
+               , $(shell rm -rf \
+                            $(strip $(OUT_OBJS_DIR)static_library/build/$(_tgt)/)___static_libs \
+                            >/dev/null) \
+               , mkdir -p $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs; \
+           ) \
+    ) \
+    $(eval $(call recipe-for-target-colon-prerequisites \
                , $(OUT_OBJS_DIR)shared_library/$(_tgt).so \
                , $(addprefix $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/), \
                      $(call generate-ObjList-from-SrcTree, $(LOCAL_SRC_FILES))) \
-               , $(CC) $$^ -Wl__________--soname__________$$(notdir $$@) \
-                     $(subst $(comma),__________, $(LOCAL_LDFLAGS)) -o $$@ \
+                     $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs \
+               , $(CC) $$(filter %.o, $$^) -Wl__________--soname__________$$(notdir $$@) \
+                     $(subst $(comma),__________, $(LOCAL_LDFLAGS)) -o $$@; \
+                 rm -rf $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs; \
            ) \
     ) \
 )
@@ -70,10 +80,19 @@ $(foreach _tgt, $(LOCAL_MODULE), \
            ) \
     ) \
     $(eval $(call recipe-for-target-colon-prerequisites \
+               , $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs \
+               , $(shell rm -rf \
+                            $(strip $(OUT_OBJS_DIR)static_library/build/$(_tgt)/)___static_libs \
+                            >/dev/null) \
+               , @mkdir -p $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs; \
+           ) \
+    ) \
+    $(eval $(call recipe-for-target-colon-prerequisites \
                , $(OUT_OBJS_DIR)shared_library/$(_tgt).so \
                , $(addprefix $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/), \
                      $(call generate-ObjList-from-SrcTree, $(LOCAL_SRC_FILES))) \
-               , @$(CC) $$^ -Wl__________--soname__________$$(notdir $$@) \
+                     $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs \
+               , @$(CC) $$(filter %.o, $$^) -Wl__________--soname__________$$(notdir $$@) \
                      $(subst $(comma),__________, $(LOCAL_LDFLAGS)) -o $$@ \
            ) \
     ) \
