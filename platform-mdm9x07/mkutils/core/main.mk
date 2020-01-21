@@ -95,7 +95,7 @@ endif # ONE_SHOT_MAKEFILE
 
 .PHONY: all_modules 
 all_modules: $(ALL_MODULES)
-
+	@echo
 
 
 .PHONY: clean

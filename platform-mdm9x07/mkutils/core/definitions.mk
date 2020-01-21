@@ -248,3 +248,108 @@ endef
 
 
 
+
+
+
+
+
+
+
+
+###########################################################
+## Jielong Lin 
+###########################################################
+
+#JLLim [FUNCTION]
+#
+# $(1) is srctree, default by $(LOCAL_SRC_FILES) when $(1) is empty.
+#
+# TEST as follows:
+# .
+# ├── A
+# │   ├── AA
+# │   │   └── test.c
+# │   └── test.c
+# ├── AndrX.mk
+# ├── B
+# │   └── test.c
+# ├── C
+# │   └── test.c
+# ├── main.c
+# └── test.c 
+#
+# For example:
+#     $(info $(call clone-DirTree-from-SrcTree, $(LOCAL_SRC_FILES)))
+#   OR
+#     $(info $(call clone-DirTree-from-SrcTree))
+# As result:
+#     ./ A/ A/AA/ B/ C/
+# The above equal to the below:
+#     .
+#     ├── A
+#     │   └── AA
+#     ├── B
+#     └── C
+# 
+define clone-DirTree-from-SrcTree
+$(if $(strip $(1)), \
+     $(sort $(foreach _item, $(strip $(1)), $(dir $(_item)))), \
+     $(sort $(foreach _item, $(strip $(LOCAL_SRC_FILES)), $(dir $(_item)))) \
+)
+endef
+
+#JLLim [FUNCTION]
+#
+# $(1) is srctree, default by $(LOCAL_SRC_FILES) when $(1) is empty.
+#
+# For example:
+#     $(info $(call generate-ObjList-from-SrcTree))
+# As result:
+#     A/AA/test.o A/test.o B/test.o C/test.o main.o test.o
+#
+define generate-ObjList-from-SrcTree
+$(if $(1), \
+     $(sort $(patsubst %.c, %.o, $(strip $(1)))), \
+     $(sort $(patsubst %.c, %.o, $(strip $(LOCAL_SRC_FILES)))) \
+)
+endef
+
+
+# $(words $(LOCAL_MODULE)) # to get the count
+
+
+
+###
+### Recipe for target colon prerequisites
+###     Target : Prerequisites 
+###     [\t]Commands
+###
+
+
+#JLLim [FUNCTION]
+#
+# $(1) is build work path to target that its relative path to TOPDIR
+# $(2) is work path to source code, default by LOCAL_PATH
+# $(3) is source file list, default by LOCAL_SRC_FILES
+# $(4) is cflags 
+# $(5) is echo selection by pass @
+define recipe-for-ObjList-colon-RuleForObj-colon-RuleForSrc
+$(addprefix $(strip $(1)), $(call generate-ObjList-from-SrcTree, $(3))) : $(strip $(1))%.o : $(strip $(2))%.c
+	$(5)mkdir -p $$(dir $$@)
+	$(5)$(CC) $$< $(4) -c -o $$@
+endef
+
+
+comma := ,
+
+#JLLim [FUNCTION]
+#
+#
+define recipe-for-target-colon-prerequisites 
+$(strip $(1)) : $(strip $(2))
+	@$(if $(filter-out ___static_libs, $(notdir $(strip $(1)))) \
+	       , echo -e "\n[Build] Recipe for target: $(notdir $(strip $(1)))" \
+           , )
+	$(subst __________,$(comma), $(3))
+endef
+

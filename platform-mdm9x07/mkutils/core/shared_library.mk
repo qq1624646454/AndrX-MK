@@ -1,53 +1,84 @@
-
+#Copyrights(C) 2020-2100.    Jielong Lin.    All rights reserved.
+#
 include $(BUILD_SYSTEM)/lib.mk
 
-#LOCAL_MODULE := $(foreach lib,$(LOCAL_MODULE), $(lib).so)
+#0: disable compile log
+#1: enable compile log
+JLLim_DEBUG := 0 
 
-TARGET_OUT_DIR := $(OUT_OBJS_DIR)$(LOCAL_PATH)/shared_library/build/
-
-TARGET_MODS_LIST := $(addprefix $(TARGET_OUT_DIR:%/build/=%/), $(addsuffix .so, $(LOCAL_MODULE)))
-
-
-TARGET_OBJS_LIST := $(foreach _ofile, $(patsubst %.c, %.o, $(LOCAL_SRC_FILES)), \
-                      $(TARGET_OUT_DIR)$(_ofile))
-#TARGET_OBJS_LIST := $(foreach _ofile, $(patsubst %.c, %.o, $(call all-subdir-c-files)), \
-#                      $(TARGET_OUT_DIR)$(_ofile))
-
-TARGET_OBJS_DIRS_LIST := $(foreach _ofile, $(TARGET_OBJS_LIST), $(dir $(_ofile)))
-
-
+###########################################
+# CFLAGS
+###########################################
 
 LOCAL_CFLAGS += -fPIC
+
+
+###########################################
+# LDFLAGS
+###########################################
 
 LOCAL_LDFLAGS += -shared 
 
 #All symbols are retrieved from static libraries then imported to this shared
-LOCAL_LDFLAGS += -Wl,--whole-archive \
+ifneq ($(strip $(LOCAL_WHOLE_STATIC_LIBRARIES)),)
+LOCAL_LDFLAGS += -Wl$(comma)--whole-archive \
                  $(call normalize-target-libraries,$(LOCAL_WHOLE_STATIC_LIBRARIES)) \
-                 -Wl,--no-whole-archive \
-                 -Wl,--start-group \
+                 -Wl$(comma)--no-whole-archive
+endif
+
+ifneq ($(strip $(LOCAL_STATIC_LIBRARIES)),)
+LOCAL_LDFLAGS += -Wl$(comma)--start-group \
                  $(call normalize-target-libraries,$(LOCAL_STATIC_LIBRARIES)) \
-                 -Wl,--end-group
+                 -Wl$(comma)--end-group
+endif
 
 
-.PHONY: $(LOCAL_MODULE).PREBUILD $(TARGET_OBJS_DIRS_LIST)
-$(LOCAL_MODULE).PREBUILD : $(TARGET_OBJS_DIRS_LIST)
-	@mkdir -pv $^
-#	@$(info [Build] $(foreach _mfile, $(LOCAL_MODULE), $(_mfile).so))
+###########################################################################
+# Makefile Recipes, namely the rules associated with how to build modules
+###########################################################################
 
-
-
-$(TARGET_MODS_LIST) : $(LOCAL_MODULE).PREBUILD $(TARGET_OBJS_LIST)
-	@$(info [Build] recipe for target $@)
-	$(CC)  $(TARGET_OBJS_LIST) -Wl,--soname,$(notdir $@) $(LOCAL_LDFLAGS) -o $@
-
-
-
-#-fPIC is position independent code, needed for shared libraries 
-$(TARGET_OBJS_LIST) : $(TARGET_OUT_DIR)%.o : $(LOCAL_PATH)/%.c
-	@$(CC) $< $(LOCAL_CFLAGS) -c -o $@ 
-
-
+#JLLim:
+#    recipe list for all source files to object files then all object files to shared library
+#
+ifeq ($(strip $(JLLim_DEBUG)), 1)
+$(foreach _tgt, $(LOCAL_MODULE), \
+    $(eval $(call recipe-for-ObjList-colon-RuleForObj-colon-RuleForSrc \
+               , $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/ \
+               , $(LOCAL_PATH)/ \
+               , $(LOCAL_SRC_FILES) \
+               , $(LOCAL_CFLAGS) \
+               , \
+           ) \
+    ) \
+    $(eval $(call recipe-for-target-colon-prerequisites \
+               , $(OUT_OBJS_DIR)shared_library/$(_tgt).so \
+               , $(addprefix $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/), \
+                     $(call generate-ObjList-from-SrcTree, $(LOCAL_SRC_FILES))) \
+               , $(CC) $$^ -Wl__________--soname__________$$(notdir $$@) \
+                     $(subst $(comma),__________, $(LOCAL_LDFLAGS)) -o $$@ \
+           ) \
+    ) \
+)
+else  #JLLim_DEBUG=0
+$(foreach _tgt, $(LOCAL_MODULE), \
+    $(eval $(call recipe-for-ObjList-colon-RuleForObj-colon-RuleForSrc \
+               , $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/ \
+               , $(LOCAL_PATH)/ \
+               , $(LOCAL_SRC_FILES) \
+               , $(LOCAL_CFLAGS) \
+               , @ \
+           ) \
+    ) \
+    $(eval $(call recipe-for-target-colon-prerequisites \
+               , $(OUT_OBJS_DIR)shared_library/$(_tgt).so \
+               , $(addprefix $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/), \
+                     $(call generate-ObjList-from-SrcTree, $(LOCAL_SRC_FILES))) \
+               , @$(CC) $$^ -Wl__________--soname__________$$(notdir $$@) \
+                     $(subst $(comma),__________, $(LOCAL_LDFLAGS)) -o $$@ \
+           ) \
+    ) \
+)
+endif
 
 
 ##### Why to put all libraries between --start-group and --end-group #####
@@ -63,36 +94,15 @@ $(TARGET_OBJS_LIST) : $(TARGET_OUT_DIR)%.o : $(LOCAL_PATH)/%.c
 #Using this option has a significant performance cost. It is best to use it only when 
 #there are unavoidable circular references between two or more archives
 
-#--------------------------------------------------------------------------
-# ld just seems to be so finicky with command order that we allow
-# it to be overriden en-masse see combo/linux-arm.make for an example.
-ifneq ($(TARGET_CUSTOM_LD_COMMAND),true)
-define transform-o-to-shared-lib-inner
-$(hide) $(PRIVATE_CXX) \
-    $(PRIVATE_TARGET_GLOBAL_LDFLAGS) \
-    -Wl,-rpath-link=$(TARGET_OUT_INTERMEDIATE_LIBRARIES) \
-    -Wl,-rpath,\$$ORIGIN/../lib \
-    -shared -Wl,-soname,$(notdir $@) \
-    $(PRIVATE_LDFLAGS) \
-    $(PRIVATE_TARGET_GLOBAL_LD_DIRS) \
-    $(PRIVATE_ALL_OBJECTS) \
-    -Wl,--whole-archive \
-    $(call normalize-target-libraries,$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
-    -Wl,--no-whole-archive \
-    $(if $(PRIVATE_GROUP_STATIC_LIBRARIES),-Wl$(comma)--start-group) \
-    $(call normalize-target-libraries,$(PRIVATE_ALL_STATIC_LIBRARIES)) \
-    $(if $(PRIVATE_GROUP_STATIC_LIBRARIES),-Wl$(comma)--end-group) \
-    $(call normalize-target-libraries,$(PRIVATE_ALL_SHARED_LIBRARIES)) \
-    -o $@ \
-    $(PRIVATE_LDLIBS)
-endef
-endif
-#--------------------------------------------------------------------------
 
+### JLLim:
+###     := can directly read the value of the variable but += not,
+###     The value of the module target list should be appended to ALL_MODULES rather than
+###     its variable name that the value of the same variable may be changed to another value.
+#ALL_MODULES += $(addsuffix .so, $(addprefix $(OUT_OBJS_DIR)shared_library/, $(LOCAL_MODULE)))
+ALL_MODULES := $(ALL_MODULES) \
+               $(addsuffix .so, $(addprefix $(OUT_OBJS_DIR)shared_library/, $(LOCAL_MODULE)))
 
-
-
-ALL_MODULES += $(TARGET_MODS_LIST)
 
 
 #

@@ -37,23 +37,8 @@ LOCAL_MODULE := libWorld libHello
 LOCAL_MODULE_TAGS := optional
 
 #LOCAL_SHARED_LIBRARIES  := libutils liblog
-LOCAL_STATIC_LIBRARIES  := libtest libtest2 libY libs/libX
+LOCAL_STATIC_LIBRARIES  := libX libY libtest
 
 include $(BUILD_STATIC_LIBRARY)
-
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(call all-subdir-c-files) 
-
-LOCAL_MODULE := libWorld___x libHello__x
-
-LOCAL_MODULE_TAGS := optional
-
-#LOCAL_SHARED_LIBRARIES  := libutils liblog
-#LOCAL_STATIC_LIBRARIES  := libtest libtest2 libY libs/libX
-
-include $(BUILD_STATIC_LIBRARY)
-
 
 

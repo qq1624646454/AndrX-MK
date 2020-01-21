@@ -105,6 +105,9 @@ function mm()
             #       ONE_SHOT_MAKEFILE=riv-common/AndrX.mk \
             #       make -C /root/prj_makefile/ws_makefile/sdk-l170h \
             #            -f mkutils/core/main.mk all_modules
+            if [ x"$ARGS" = x"clean" ]; then
+                MODULES=
+            fi
             echo "[Run] ONE_SHOT_MAKEFILE=$M make -C $T -f mkutils/core/main.mk $MODULES $ARGS"
             ONE_SHOT_MAKEFILE=$M make -C $T -f mkutils/core/main.mk $MODULES $ARGS
         fi
@@ -113,10 +116,9 @@ function mm()
 
 
 
-if [ x"${ENV_INIT}" != x"1" -a -e ${ENV_CROSS_COMPILE_TOOLCHAIN} ]; then
-    #-a -e mkutils/portability/environment-setup-armv7a-vfp-neon-oe-linux-gnueabi ]; then
-    #source mkutils/portability/environment-setup-armv7a-vfp-neon-oe-linux-gnueabi
-    source ${ENV_CROSS_COMPILE_TOOLCHAIN} 
+if [ x"${ENV_INIT}" != x"1" \
+    -a -e mkutils/portability/environment-setup-armv7a-vfp-neon-oe-linux-gnueabi ]; then
+    source mkutils/portability/environment-setup-armv7a-vfp-neon-oe-linux-gnueabi
     export ENV_INIT=1
     if [ -d mkutils/tools -a y"$(gettop 2>/dev/null)" != y ]; then
         export PATH=$(gettop)/mkutils/tools:$PATH
