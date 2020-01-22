@@ -1,3 +1,9 @@
-CC=gcc
-LD=ld
-
+export CC=gcc
+export LD=ld
+export GDB=gdb
+export STRIP=strip
+export RANLIB=arm-oe-linux-gnueabi-ranlib
+export OBJCOPY=objcopy
+export OBJDUMP=objdump
+export AR=ar
+export NM=nm

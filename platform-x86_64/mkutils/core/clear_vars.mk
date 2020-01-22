@@ -12,6 +12,8 @@ LOCAL_SHARED_LIBRARIES :=
 LOCAL_STATIC_LIBRARIES :=
 # Group static libraries with "-Wl,--start-group" and "-Wl,--end-group" when linking""""
 
+LOCAL_WHOLE_STATIC_LIBRARIES :=
+
 LOCAL_ASFLAGS :=
 LOCAL_CFLAGS :=
 LOCAL_CPPFLAGS :=

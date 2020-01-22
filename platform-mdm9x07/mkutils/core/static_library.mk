@@ -2,8 +2,8 @@
 #
 include $(BUILD_SYSTEM)/lib.mk
 
-#0: disable compile log
-#1: enable compile log
+#0: disable compile log in meanwhile mm re-compile this module only when source is changed.
+#1: enable compile log in meanwhile mm will re-compile this module
 JLLim_DEBUG := 0
 
 ###########################################

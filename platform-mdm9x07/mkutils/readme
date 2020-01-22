@@ -1,4 +1,18 @@
 
-build is copied from  android-4.x
-    /ibbyte1024MB/corporation/www.reachxm.com/svn/Banana/trunk/build
+
+source mkutils/envsetup
+
+cd path-to-module/
+mm                    #compile then link into target file
+mm clean              #clean TOPDIR/out
+
+
+
+@ mkutils/core/shared_library.mk
+@ mkutils/core/static_library.mk 
+JLLim_DEBUG := 0  # mm will trigger target is built only when the source code is changed, 
+                  # in meanwhile without any log detail
+JLLim_DEBUG := 1  # mm will trigger target is built anytime, in meanwhile with log detail 
+
+mm clean  # remove all by delete TOPDIR/out
 

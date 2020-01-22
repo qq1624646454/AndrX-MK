@@ -6,7 +6,7 @@ void A_AA_test();
 void B_test();
 void C_test();
 
-int API_main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     printf("%s %s %d\r\n", __FILE__, __FUNCTION__, __LINE__);
 
@@ -15,6 +15,7 @@ int API_main(int argc, char **argv)
     A_AA_test();
     B_test();
     C_test();
+
     printf("OVER: %s %s %d\r\n", __FILE__, __FUNCTION__, __LINE__);
 
     return 0;

@@ -2,8 +2,8 @@
 #
 include $(BUILD_SYSTEM)/lib.mk
 
-#0: disable compile log
-#1: enable compile log
+#0: disable compile log in meanwhile mm re-compile this module only when source is changed.
+#1: enable compile log in meanwhile mm will re-compile this module
 JLLim_DEBUG := 0
 
 ###########################################
@@ -53,7 +53,7 @@ $(foreach _tgt, $(LOCAL_MODULE), \
     $(eval $(call recipe-for-target-colon-prerequisites \
                , $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs \
                , $(shell rm -rf \
-                            $(strip $(OUT_OBJS_DIR)static_library/build/$(_tgt)/)___static_libs \
+                            $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs \
                             >/dev/null) \
                , mkdir -p $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs; \
            ) \
@@ -81,9 +81,7 @@ $(foreach _tgt, $(LOCAL_MODULE), \
     ) \
     $(eval $(call recipe-for-target-colon-prerequisites \
                , $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs \
-               , $(shell rm -rf \
-                            $(strip $(OUT_OBJS_DIR)static_library/build/$(_tgt)/)___static_libs \
-                            >/dev/null) \
+               , \
                , @mkdir -p $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs; \
            ) \
     ) \

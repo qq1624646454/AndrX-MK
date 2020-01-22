@@ -16,7 +16,8 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-subdir-c-files) 
+#LOCAL_SRC_FILES := $(call all-subdir-c-files) 
+LOCAL_SRC_FILES := A/test.c A/AA/test.c B/test.c C/test.c
 
 LOCAL_MODULE := libsubfunc2 libsubfuncY
 
@@ -30,7 +31,8 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-subdir-c-files) 
+#LOCAL_SRC_FILES := $(call all-subdir-c-files) 
+LOCAL_SRC_FILES := test.c  
 
 LOCAL_MODULE := libWorld libHello
 
@@ -56,4 +58,16 @@ LOCAL_MODULE_TAGS := optional
 include $(BUILD_STATIC_LIBRARY)
 
 
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := $(call all-subdir-c-files) 
+
+LOCAL_MODULE := World___x Hello__x
+
+LOCAL_MODULE_TAGS := optional
+
+#LOCAL_SHARED_LIBRARIES  := libutils liblog
+#LOCAL_STATIC_LIBRARIES  := libtest libtest2 libY libs/libX
+
+include $(BUILD_EXECUTABLE)
 
