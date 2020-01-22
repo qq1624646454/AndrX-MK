@@ -38,7 +38,7 @@ LOCAL_LDFLAGS +=
 #
 #
 ifeq ($(strip $(JLLim_DEBUG)), 1)
-define collect-and-extract-static-libs-to-o-by-shell
+define collect-static-libs-to-o-by-shell
     echo  __1__=$(1); \
     echo  __2__=$(2); \
     echo  __3__=$(3); \

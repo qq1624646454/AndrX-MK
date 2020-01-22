@@ -58,16 +58,16 @@ LOCAL_MODULE_TAGS := optional
 include $(BUILD_STATIC_LIBRARY)
 
 
-include $(CLEAR_VARS)
+#include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-subdir-c-files) 
+#LOCAL_SRC_FILES := $(call all-subdir-c-files) 
 
-LOCAL_MODULE := World___x Hello__x
+#LOCAL_MODULE := World___x Hello__x
 
-LOCAL_MODULE_TAGS := optional
+#LOCAL_MODULE_TAGS := optional
 
 #LOCAL_SHARED_LIBRARIES  := libutils liblog
 #LOCAL_STATIC_LIBRARIES  := libtest libtest2 libY libs/libX
 
-include $(BUILD_EXECUTABLE)
+#include $(BUILD_EXECUTABLE)
 

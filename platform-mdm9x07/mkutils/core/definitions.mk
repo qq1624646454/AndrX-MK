@@ -353,3 +353,29 @@ $(strip $(1)) : $(strip $(2))
 	$(subst __________,$(comma), $(3))
 endef
 
+
+#JLLim [FUNCTION]
+#
+# $(1) is the static library list
+# $(2) is local source path default by LOCAL_PATH
+#
+## Check if LOCAL_PATH/libxxx.a existed or not
+## Check if static_library/libxxx.a existed or not
+## Check 3rd-library if path-to-libxxx.a directly specified in LOCAL_STATIC_LIBRARIES existed
+define find-path-for-static-libs
+$(foreach f, $(1), \
+  $(if $(wildcard $(2)$(f)) \
+    , $(2)$(f) \
+    , $(if $(wildcard $(f)) \
+        , $(f) \
+        , $(if $(wildcard $(OUT_OBJS_DIR)static_library/$(f))  \
+            , $(OUT_OBJS_DIR)static_library/$(f) \
+            , $(error not found $(OUT_OBJS_DIR)static_library/$(f)) \
+          )\
+      ) \
+  ) \
+)
+endef
+
+
+

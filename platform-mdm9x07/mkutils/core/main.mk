@@ -91,10 +91,11 @@ include $(ONE_SHOT_MAKEFILE)
 
 endif # ONE_SHOT_MAKEFILE
 
-
+#ALL_MODULES should be sorted by library should be first
 
 .PHONY: all_modules 
-all_modules: $(ALL_MODULES)
+all_modules:  $(filter %.a, $(ALL_MODULES)) $(filter %.so, $(ALL_MODULES)) \
+              $(filter-out %.a %.so, $(ALL_MODULES))
 	@echo
 
 

@@ -22,13 +22,17 @@ LOCAL_LDFLAGS += -shared
 #All symbols are retrieved from static libraries then imported to this shared
 ifneq ($(strip $(LOCAL_WHOLE_STATIC_LIBRARIES)),)
 LOCAL_LDFLAGS += -Wl$(comma)--whole-archive \
-                 $(call normalize-target-libraries,$(LOCAL_WHOLE_STATIC_LIBRARIES)) \
+                 $(call find-path-for-static-libs, \
+                     $(call normalize-target-libraries,$(LOCAL_WHOLE_STATIC_LIBRARIES)) \
+                 ) \
                  -Wl$(comma)--no-whole-archive
 endif
 
 ifneq ($(strip $(LOCAL_STATIC_LIBRARIES)),)
 LOCAL_LDFLAGS += -Wl$(comma)--start-group \
-                 $(call normalize-target-libraries,$(LOCAL_STATIC_LIBRARIES)) \
+                 $(call find-path-for-static-libs, \
+                     $(call normalize-target-libraries,$(LOCAL_STATIC_LIBRARIES)) \
+                 ) \
                  -Wl$(comma)--end-group
 endif
 

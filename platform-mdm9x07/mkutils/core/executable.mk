@@ -4,7 +4,7 @@ include $(BUILD_SYSTEM)/lib.mk
 
 #0: disable compile log in meanwhile mm re-compile this module only when source is changed.
 #1: enable compile log in meanwhile mm will re-compile this module
-JLLim_DEBUG := 0
+JLLim_DEBUG := 1 
 
 ###########################################
 # CFLAGS
@@ -17,20 +17,31 @@ LOCAL_CFLAGS += -fPIC
 # LDFLAGS
 ###########################################
 
-LOCAL_LDFLAGS += 
 
 #All symbols are retrieved from static libraries then imported to this shared
 ifneq ($(strip $(LOCAL_WHOLE_STATIC_LIBRARIES)),)
 LOCAL_LDFLAGS += -Wl$(comma)--whole-archive \
-                 $(call normalize-target-libraries,$(LOCAL_WHOLE_STATIC_LIBRARIES)) \
+                 $(call find-path-for-static-libs \
+                    , $(call normalize-target-libraries,$(LOCAL_WHOLE_STATIC_LIBRARIES)) \
+                    , $(LOCAL_PATH)/ \
+                 ) \
                  -Wl$(comma)--no-whole-archive
 endif
 
 ifneq ($(strip $(LOCAL_STATIC_LIBRARIES)),)
+#LOCAL_LDFLAGS += -Wl$(comma)--start-group \
+#                 $(call normalize-target-libraries,$(LOCAL_STATIC_LIBRARIES)) \
+#                 -Wl$(comma)--end-group
 LOCAL_LDFLAGS += -Wl$(comma)--start-group \
-                 $(call normalize-target-libraries,$(LOCAL_STATIC_LIBRARIES)) \
+                 $(call find-path-for-static-libs, \
+                    , $(call normalize-target-libraries, $(LOCAL_STATIC_LIBRARIES)) \
+                    , $(LOCAL_PATH)/ \
+                 ) \
                  -Wl$(comma)--end-group
 endif
+
+
+
 
 
 ###########################################################################
@@ -63,7 +74,7 @@ $(foreach _tgt, $(LOCAL_MODULE), \
                , $(addprefix $(strip $(OUT_OBJS_DIR)executable/build/$(_tgt)/), \
                      $(call generate-ObjList-from-SrcTree, $(LOCAL_SRC_FILES))) \
                      $(strip $(OUT_OBJS_DIR)executable/build/$(_tgt)/)___static_libs \
-               , $(CC) $$(filter %.o, $$^) -Wl__________--soname__________$$(notdir $$@) \
+               , $(CC) $$(filter %.o, $$^) \
                      $(subst $(comma),__________, $(LOCAL_LDFLAGS)) -o $$@; \
                  rm -rf $(strip $(OUT_OBJS_DIR)executable/build/$(_tgt)/)___static_libs; \
            ) \
@@ -90,7 +101,7 @@ $(foreach _tgt, $(LOCAL_MODULE), \
                , $(addprefix $(strip $(OUT_OBJS_DIR)executable/build/$(_tgt)/), \
                      $(call generate-ObjList-from-SrcTree, $(LOCAL_SRC_FILES))) \
                      $(strip $(OUT_OBJS_DIR)executable/build/$(_tgt)/)___static_libs \
-               , @$(CC) $$(filter %.o, $$^) -Wl__________--soname__________$$(notdir $$@) \
+               , @$(CC) $$(filter %.o, $$^) \
                      $(subst $(comma),__________, $(LOCAL_LDFLAGS)) -o $$@ \
            ) \
     ) \
