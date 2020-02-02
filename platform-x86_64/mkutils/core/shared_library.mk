@@ -22,13 +22,19 @@ LOCAL_LDFLAGS += -shared
 #All symbols are retrieved from static libraries then imported to this shared
 ifneq ($(strip $(LOCAL_WHOLE_STATIC_LIBRARIES)),)
 LOCAL_LDFLAGS += -Wl$(comma)--whole-archive \
-                 $(call normalize-target-libraries,$(LOCAL_WHOLE_STATIC_LIBRARIES)) \
+                 $(call find-path-for-static-libs \
+                    , $(call normalize-target-libraries,$(LOCAL_WHOLE_STATIC_LIBRARIES)) \
+                    , $(LOCAL_PATH)/ \
+                 ) \
                  -Wl$(comma)--no-whole-archive
 endif
 
 ifneq ($(strip $(LOCAL_STATIC_LIBRARIES)),)
 LOCAL_LDFLAGS += -Wl$(comma)--start-group \
-                 $(call normalize-target-libraries,$(LOCAL_STATIC_LIBRARIES)) \
+                 $(call find-path-for-static-libs \
+                    , $(call normalize-target-libraries, $(LOCAL_STATIC_LIBRARIES)) \
+                    , $(LOCAL_PATH)/ \
+                 ) \
                  -Wl$(comma)--end-group
 endif
 
@@ -59,13 +65,17 @@ $(foreach _tgt, $(LOCAL_MODULE), \
            ) \
     ) \
     $(eval $(call recipe-for-target-colon-prerequisites \
-               , $(OUT_OBJS_DIR)shared_library/$(_tgt).so \
-               , $(addprefix $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/), \
-                     $(call generate-ObjList-from-SrcTree, $(LOCAL_SRC_FILES))) \
-                     $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs \
-               , $(CC) $$(filter %.o, $$^) -Wl__________--soname__________$$(notdir $$@) \
-                     $(subst $(comma),__________, $(LOCAL_LDFLAGS)) -o $$@; \
-                 rm -rf $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs; \
+              , $(OUT_OBJS_DIR)shared_library/$(_tgt).so \
+              , $(addprefix $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/), \
+                   $(call generate-ObjList-from-SrcTree, $(LOCAL_SRC_FILES))) \
+                $(call filter-out-static-libs-as-prerequisites \
+                   , $(call normalize-target-libraries, $(LOCAL_STATIC_LIBRARIES)) \
+                   , $(LOCAL_PATH)/ \
+                ) \
+                $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs \
+              , $(CC) $$(filter %.o, $$^) -Wl__________--soname__________$$(notdir $$@) \
+                   $(subst $(comma),__________, $(LOCAL_LDFLAGS)) -o $$@; \
+              rm -rf $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs; \
            ) \
     ) \
 )
@@ -86,12 +96,16 @@ $(foreach _tgt, $(LOCAL_MODULE), \
            ) \
     ) \
     $(eval $(call recipe-for-target-colon-prerequisites \
-               , $(OUT_OBJS_DIR)shared_library/$(_tgt).so \
-               , $(addprefix $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/), \
-                     $(call generate-ObjList-from-SrcTree, $(LOCAL_SRC_FILES))) \
-                     $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs \
-               , @$(CC) $$(filter %.o, $$^) -Wl__________--soname__________$$(notdir $$@) \
-                     $(subst $(comma),__________, $(LOCAL_LDFLAGS)) -o $$@ \
+              , $(OUT_OBJS_DIR)shared_library/$(_tgt).so \
+              , $(addprefix $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/), \
+                   $(call generate-ObjList-from-SrcTree, $(LOCAL_SRC_FILES))) \
+                $(call filter-out-static-libs-as-prerequisites \
+                   , $(call normalize-target-libraries, $(LOCAL_STATIC_LIBRARIES)) \
+                   , $(LOCAL_PATH)/ \
+                ) \
+                $(strip $(OUT_OBJS_DIR)shared_library/build/$(_tgt)/)___static_libs \
+              , @$(CC) $$(filter %.o, $$^) -Wl__________--soname__________$$(notdir $$@) \
+                   $(subst $(comma),__________, $(LOCAL_LDFLAGS)) -o $$@ \
            ) \
     ) \
 )
