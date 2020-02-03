@@ -1,6 +1,19 @@
 
 
-source mkutils/envsetup
+########
+######## 1.Initialize the developped environment in bash shell process
+######## select one recipe to source for the specified platform developped environment
+
+#for qualcomm mdm9x07 platform 
+source mkutils/envsetup_for_mdm9x07
+
+#for intel x86-64 platform 
+source mkutils/envsetup_for_x86_64
+
+
+########
+######## 2.Build module with clean
+########
 
 cd path-to-module/
 mm                    #compile then link into target file
@@ -10,6 +23,7 @@ mm clean              #clean TOPDIR/out
 
 @ mkutils/core/shared_library.mk
 @ mkutils/core/static_library.mk 
+@ mkutils/core/executable.mk 
 JLLim_DEBUG := 0  # mm will trigger target is built only when the source code is changed, 
                   # in meanwhile without any log detail
 JLLim_DEBUG := 1  # mm will trigger target is built anytime, in meanwhile with log detail 

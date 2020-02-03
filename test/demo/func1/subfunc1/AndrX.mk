@@ -39,7 +39,7 @@ LOCAL_MODULE := libWorld libHello
 LOCAL_MODULE_TAGS := optional
 
 #LOCAL_SHARED_LIBRARIES  := libutils liblog
-LOCAL_STATIC_LIBRARIES  := libtest libtest2 libY libs/libX
+LOCAL_STATIC_LIBRARIES  := libtest libtest2 libY libs_from_3rd/libX
 
 include $(BUILD_STATIC_LIBRARY)
 

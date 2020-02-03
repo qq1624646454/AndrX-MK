@@ -6,6 +6,9 @@
 *************************************************************************************
 
 
+runtime shared library path can be one of the follows:
+    /reach/vendor/modules/bin
+    /reach/vendor/modules/lib
 
 @ mkutils/core/shared_library.mk
 @ mkutils/core/static_library.mk 
@@ -21,12 +24,46 @@ mm clean  # remove all by delete TOPDIR/out
 
 
 
+===============================================
+How to compile source code for C language code
 -----------------------------------------------
-How to compile source code for C language code 
+demo/
+├── AndrX.mk
+├── demo1
+│   ├── AndrX.mk
+│   ├── app
+│   │   ├── AndrX.mk
+│   │   └── main.c
+│   ├── shared
+│   │   ├── AndrX.mk
+│   │   └── my.c
+│   └── static
+│       ├── AndrX.mk
+│       └── my.c
+└── func1
+    ├── AndrX.mk
+    ├── main.c
+    └── subfunc1
+        ├── A
+        │   ├── AA
+        │   │   └── test.c
+        │   └── test.c
+        ├── AndrX.mk
+        ├── AndrX.mk.orig
+        ├── AndrX.mk.orig1
+        ├── B
+        │   └── test.c
+        ├── C
+        │   └── test.c
+        ├── libtest2.a
+        ├── libtest.a
+        ├── libY.a
+        ├── Makefile
+        └── test.c
 -----------------------------------------------
 JLLim@S.#
-JLLim@S.#
-JLLim@S.# source mkutils/envsetup
+JLLim@S.# #Cross build target over mdm9x07
+JLLim@S.# source mkutils/envsetup_for_mdm9x07
 JLLim@S.#
 JLLim@S.# cd demo/func1/subfunc1/
 JLLim@S.#
@@ -50,24 +87,56 @@ JLLim@S.#
 JLLim@S.#
 JLLim@S.# tree ../../../out/
 
-../../../out/
-└── objs
-    └── demo
-        └── func1
-            └── subfunc1
-                └── shared_library
-                    ├── build
-                    │   ├── A
-                    │   │   ├── AA
-                    │   │   │   └── test.o
-                    │   │   └── test.o
-                    │   ├── B
-                    │   │   └── test.o
-                    │   ├── C
-                    │   │   └── test.o
-                    │   ├── main.o
-                    │   └── test.o
-                    └── libsubfunc1.so
+JLLim@S.#
+JLLim@S.#
+JLLim@S.# ENV_INIT=0
+JLLim@S.# source mkutils/envsetup_for_mdm9x07
+JLLim@S.#
+JLLim@S.# cd demo
+JLLim@S.#
+JLLim@S.# mm
 
-10 directories, 7 files
+JLLim@S.#
+JLLim@S.# tree ../out/ -L 3
+../out/
+└── objs
+    ├── executable
+    │   ├── build
+    │   ├── demo-app
+    │   └── main
+    ├── shared_library
+    │   ├── build
+    │   ├── libmy.so
+    │   ├── libsubfunc1.so
+    │   ├── libsubfunc2.so
+    │   ├── libsubfuncX.so
+    │   └── libsubfuncY.so
+    └── static_library
+        ├── build
+        ├── libHello.a
+        ├── libHello__x.a
+        ├── libmy.a
+        ├── libWorld.a
+        └── libWorld___x.a
+
+#####
+##### If target is used for running intel platform, please do as follows:
+#####
+
+ENV_INIT=0 #prepare for re-source environment initialized, please set ENV_INIT=0
+source mkutils/envsetup_for_x86_64
+
+cd path-to-module/
+mm                    #compile then link into target file
+mm clean              #clean TOPDIR/out
+
+
+
+@ mkutils/core/shared_library.mk
+@ mkutils/core/static_library.mk 
+JLLim_DEBUG := 0  # mm will trigger target is built only when the source code is changed, 
+                  # in meanwhile without any log detail
+JLLim_DEBUG := 1  # mm will trigger target is built anytime, in meanwhile with log detail 
+
+mm clean  # remove all by delete TOPDIR/out
 

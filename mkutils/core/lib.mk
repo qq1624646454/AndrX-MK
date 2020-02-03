@@ -14,7 +14,7 @@ LOCAL_CFLAGS += ${CFLAGS}
 # 
 #Config the runtime library path
 LOCAL_LDFLAGS += ${LDFLAGS}\
-                 -Wl,-rpath,/reach/vendor/modules/usr/bin:/reach/vendor/modules/lib
+                 -Wl,-rpath,/reach/vendor/modules/bin:/reach/vendor/modules/lib
 
 #$(foreach <var>,<list>,<text>) for Makefile
 LOCAL_SHARED_LIBRARIES := $(foreach lib,$(LOCAL_SHARED_LIBRARIES), $(lib).so)
